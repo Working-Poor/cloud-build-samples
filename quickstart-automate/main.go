@@ -19,5 +19,5 @@ import (
 )
 
 func main () {
-  fmt.Println("Hello, universe man!")
+  fmt.Println("Hello, gcp study !")
 }
