@@ -29,32 +29,34 @@ steps:
   # Docker Build
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 
-           'us-central1-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/myimage:$SHORT_SHA', '.']
+           'us-central1-docker.pkg.dev/$PROJECT_ID/minjae-registry/myimage', '.']
   # [END cloudbuild_go_image_yaml]
   
   # [START cloudbuild_go_push_yaml]
   # Docker push to Google Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/myimage:$SHORT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/minjae-registry/myimage']
   # [END cloudbuild_go_push_yaml]
   
   # [START cloudbuild_go_deploy_yaml]
-  # Deploy to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud'
+  # Deploy container image to Cloud Run for Anthos
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
     args: ['run', 'deploy', 'helloworld', 
-           '--image=us-central1-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/myimage:$SHORT_SHA', 
-           '--region', 'us-central1', '--platform', 'managed']
+           '--image=us-central1-docker.pkg.dev/$PROJECT_ID/minjae-registry/myimage', 
+           '--cluster', 'cicd-minjae-cluster', '--cluster-location', 'us-central1-c', '--platform', 'gke']
+
   # [END cloudbuild_go_deploy_yaml]
 
 # [START cloudbuild_go_logs_yaml]
 # Save test logs to Google Cloud Storage
 artifacts:
   objects:
-    location: gs://$_BUCKET_NAME/
+    location: gs://minjae-bucket/
     paths:
       - ${SHORT_SHA}_test_log.xml
 # [END cloudbuild_go_logs_yaml]
 # Store images in Google Artifact Registry
 images:
-  - us-central1-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/myimage:$SHORT_SHA
+  - us-central1-docker.pkg.dev/$PROJECT_ID/minjae-registry/myimage
 # [END cloudbuild_go_yaml]
